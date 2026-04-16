@@ -1,5 +1,5 @@
 import express, { Application, Request, Response, NextFunction } from 'express';
-import indexRoutes from "./routes/index"
+import indexRoutes from "./routes/index.js"
 import cookieParser from 'cookie-parser'
 
 
@@ -11,13 +11,18 @@ app.use(cookieParser())
 
 // MVC Routes go here
 
+app.use("/",indexRoutes)
+
+
+
+
+
 // Error handling middleware
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
     res.status(500).json({ success: false, message: err.message });
 });
 
 
-app.use("/",indexRoutes)
 
 
 

@@ -1,7 +1,7 @@
 
-import connectDB from "./config/db";
-import app from "./app";
-import { config } from "./config/env";
+import connectDB from "./config/db.js";
+import app from "./app.js";
+import { config } from "./config/env.js";
 
 
 
