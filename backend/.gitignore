@@ -19,3 +19,5 @@ coverage/
 # OS/IDE files
 .DS_Store
 .vscode/
+
+CLAUDE.md
