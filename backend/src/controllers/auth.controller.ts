@@ -1,25 +1,67 @@
 import { Request, Response } from "express"
 
-import { loginUser, registerUser } from "../services/auth.services.js"
+import { loginUser, logoutUser, refreshToken as refreshTokenService, registerUser } from "../services/auth.services.js"
 import asyncHandler from "../utils/asynchHandler.js";
+import AppError from "../utils/customError.js";
+
+
 
 
 
 
 export const registerController = asyncHandler(
     async (req: Request, res: Response) => {
-
         const user = await registerUser(req.body);
+        res.status(201).json({ success: true, message: "Registered successfully", data: user })
+    }
+)
 
-        res.status(201).json({ message: "Register successfully", data: user })
+export const loginController = asyncHandler(
+    async (req: Request, res: Response) => {
+        const { user, accessToken, refreshToken } = await loginUser(req.body);
+
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: 7 * 24 * 60 * 60 * 1000
+        });
+
+        res.status(200).json({
+            success: true,
+            message: "Login successful",
+            accessToken,
+            user
+        });
     }
 )
 
 
-export const loginController = asyncHandler(
+export const logoutController = asyncHandler(
     async (req: Request, res: Response) => {
-        const user = await loginUser(req.body);
+        const userId = req.user!.userId;
 
-        res.status(200).json({ message: "Login successfully", user })
+        await logoutUser(userId);
+
+        res.clearCookie("refreshToken", {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict"
+        });
+
+        res.status(200).json({ success: true, message: "Logged out successfully" });
+    }
+)
+
+
+export const refreshTokenController = asyncHandler(
+    async (req, res, next) => {
+        const token = req.cookies.refreshToken;
+        if (!token) {
+            throw new AppError("Token not found", 401);
+        }
+
+        const { accessToken } = await refreshTokenService(token);
+        res.status(200).json({ success: true, accessToken });
     }
 )
