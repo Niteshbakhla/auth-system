@@ -1,8 +1,11 @@
 import { User } from "../models/User.js"
-import { LoginInput, RegisterInput } from "../modules/auth/auth.validation.js";
+import { LoginInput, RegisterInput, ResetPasswordInput } from "../modules/auth/auth.validation.js";
 import AppError from "../utils/customError.js";
+import { sendEmail } from "../utils/email.js";
+import { hashing } from "../utils/hashing.js";
 import { comparePassword, hashPassword } from "../utils/password.js";
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../utils/token.js";
+import crypto from "crypto";
 
 
 
@@ -92,4 +95,49 @@ export const refreshToken = async (token: string) => {
 
     const accessToken = generateAccessToken({ userId: user.id, tokenVersion: user.tokenVersion });
     return { accessToken }
+}
+
+
+export const forgotPassword = async (email: string) => {
+    const isEmailExist = await User.findOne({ email });
+
+    if (!isEmailExist) return
+
+    const token = crypto.randomBytes(32).toString("hex");
+
+
+
+    const hashedToken = hashing(token);
+
+
+
+    isEmailExist.passwordResetToken = hashedToken;
+    isEmailExist.passwordResetExpires = new Date(Date.now() + 15 * 60 * 1000);
+    await isEmailExist.save();
+    console.log("Sending email to:", email);
+    console.log("Token:", token);
+
+    await sendEmail({ to: email, subject: "Password Reset", html: `<p> Reset your password ${token}</p>` });
+}
+
+
+export const resetPassword = async (payload: ResetPasswordInput) => {
+    const { token, password } = payload;
+
+
+    const hashedPassword = hashing(token);
+    const user = await User.findOne({ passwordResetToken: hashedPassword });
+
+    if (!user) {
+        throw new AppError("Invalid or expired reset token", 400);
+    }
+
+    if (user.passwordResetExpires && user.passwordResetExpires < new Date()) {
+        throw new AppError("Reset token has expired", 400);
+    }
+
+    user.password = await hashPassword(password);
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+    await user.save();
 }

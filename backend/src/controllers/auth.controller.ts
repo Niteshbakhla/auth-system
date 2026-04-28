@@ -1,6 +1,6 @@
 import { Request, Response } from "express"
 
-import { loginUser, logoutUser, refreshToken as refreshTokenService, registerUser } from "../services/auth.services.js"
+import { forgotPassword, loginUser, logoutUser, refreshToken as refreshTokenService, registerUser, resetPassword } from "../services/auth.services.js"
 import asyncHandler from "../utils/asynchHandler.js";
 import AppError from "../utils/customError.js";
 
@@ -63,5 +63,19 @@ export const refreshTokenController = asyncHandler(
 
         const { accessToken } = await refreshTokenService(token);
         res.status(200).json({ success: true, accessToken });
+    }
+)
+
+export const forgetPassowrdController = asyncHandler(
+    async (req, res, next) => {
+        await forgotPassword(req.body.email)
+        res.status(200).json({ message: "Link sent to your email" })
+    }
+)
+
+export const resetPasswordController = asyncHandler(
+    async (req, res, next) => {
+        await resetPassword(req.body);
+        res.status(200).json({ message: "Password updated successfully" })
     }
 )

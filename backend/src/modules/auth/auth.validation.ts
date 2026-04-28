@@ -11,6 +11,12 @@ export const loginSchema = z.object({
     password: z.string().min(8)
 })
 
+export const resetSchema = z.object({
+    token: z.string(),
+    password: z.string().min(8)
+})
+
 
 export type RegisterInput = z.infer<typeof registerSchema>
 export type LoginInput = z.infer<typeof loginSchema>
+export type ResetPasswordInput = z.infer<typeof resetSchema>

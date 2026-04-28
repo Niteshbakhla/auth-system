@@ -12,7 +12,9 @@ export interface IUser extends Document {
     lastLoginAt?: Date,
     isLocked: boolean,
     createdAt: Date,
-    updatedAt: Date
+    updatedAt: Date,
+    passwordResetToken?: string,
+    passwordResetExpires?: Date
 }
 
 
@@ -55,6 +57,8 @@ const UserSchema = new Schema<IUser>(
         lastLoginAt: {
             type: Date,
         },
+        passwordResetToken: String,
+        passwordResetExpires: Date
     }, {
     timestamps: true
 }
