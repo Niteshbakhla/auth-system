@@ -13,3 +13,4 @@ const validate = (schema: ZodSchema) => (req: Request, res: Response, next: Next
 };
 
 export default validate;
+
