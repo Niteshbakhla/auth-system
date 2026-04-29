@@ -1,4 +1,3 @@
-
 import connectDB from "./config/db.js";
 import app from "./app.js";
 import { config } from "./config/env.js";

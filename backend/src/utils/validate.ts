@@ -8,7 +8,7 @@ const validate = (schema: ZodSchema) => (req: Request, res: Response, next: Next
         const message = result.error.issues[0].message;
         return next(new AppError(message, 422));
     }
-    req.body = result.data; // replace with parsed/sanitized data
+    req.body = result.data; 
     next();
 };
 
